@@ -3,8 +3,10 @@
 from django.shortcuts import redirect, render
 from app.layers.services.services import getAllImages #se completan los campos que faltaban y se importa la funcion correspondiente
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login
 from app.layers.transport.transport import fetch_characters
+from django.contrib import messages
+from django.contrib.auth.models import User
 
 def index_page(request):
     return render(request, 'index.html')
@@ -43,6 +45,27 @@ def search(request):
         # Si la solicitud no es POST, redirigimos a home.
         return redirect('home')
     ##Aqui finaliza modificacion..
+## Funcion de registro
+def register(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+
+        if password1 == password2:
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'El nombre de usuario ya está en uso')
+            elif User.objects.filter(email=email).exists():
+                messages.error(request, 'El correo electrónico ya está en uso')
+            else:
+                user = User.objects.create_user(username=username, email=email, password=password1)
+                user.save()
+                login(request, user)
+                return redirect('home')
+        else:
+            messages.error(request, 'Las contraseñas no coinciden')
+    return render(request, 'registration/register.html')
 
 # Estas funciones se usan cuando el usuario está logueado en la aplicación.
 @login_required
