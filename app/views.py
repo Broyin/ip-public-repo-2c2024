@@ -28,18 +28,21 @@ def home(request):
     return render(request, 'home.html', { 'images': images, 'favourite_list': favourite_list })
 
 def search(request):
-    if request.method == 'POST':
-        search_msg = request.POST.get('query', '')
+    ##Aqui comienza modificacion de buscador
+    
+    if request.method == 'POST': ## debe cumplir esta condicion de method
+        
+        search_msg = request.POST.get('query', '') 
         if search_msg:
-            # Redirigimos a home con el parámetro de búsqueda.
-            return redirect(f'/home?search={search_msg}')
+            # Redirigimos a home con el parámetro de búsqueda.   
+            return redirect(f'/home?search={search_msg}') ##devuelve parametro de busqueda
         else:
             # Si no hay mensaje de búsqueda, redirigimos a home.
             return redirect('home')
     else:
         # Si la solicitud no es POST, redirigimos a home.
         return redirect('home')
- 
+    ##Aqui finaliza modificacion..
 
 # Estas funciones se usan cuando el usuario está logueado en la aplicación.
 @login_required
