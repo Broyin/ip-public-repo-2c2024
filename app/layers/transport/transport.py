@@ -30,3 +30,12 @@ def getAllImages(input=None):
             pass
 
     return json_collection
+#aca cree una funcion llamada fetch_characters que va a servir para pedir una solicitud a la APO y me va a devolver datos Json que me ayudaran a que se puedan ver los personajes en la pagina
+def fetch_characters():
+    url = "https://rickandmortyapi.com/api/character"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        return response.json().get("results", [])  # Debería devolver una lista de personajes.
+    else:
+        return []  # Devuelve una lista vacía si no se pudo obtener la respuesta.
