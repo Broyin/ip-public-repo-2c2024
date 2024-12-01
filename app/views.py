@@ -7,6 +7,7 @@ from django.contrib.auth import logout, login
 from app.layers.transport.transport import fetch_characters
 from django.contrib import messages
 from django.contrib.auth.models import User
+from app.models import Favourite
 
 def index_page(request):
     return render(request, 'index.html')
@@ -26,6 +27,7 @@ def home(request):
 
     # También puedes pasar los favoritos si es necesario.
     favourite_list = []
+    if request.user.is_authenticated: favourite_list = Favourite.objects.filter(user=request.user) # Obtener favoritos del usuario
 
     return render(request, 'home.html', { 'images': images, 'favourite_list': favourite_list })
 
@@ -70,17 +72,54 @@ def register(request):
 # Estas funciones se usan cuando el usuario está logueado en la aplicación.
 @login_required
 def getAllFavouritesByUser(request):
-    favourite_list = []
+    favourite_list = Favourite.objects.filter(user=request.user)
     return render(request, 'favourites.html', { 'favourite_list': favourite_list })
 
 @login_required
 def saveFavourite(request):
-    pass
+    if request.method == 'POST':
+        print("Solicitud POST recibida") # Agrega esto para depuración
+        # Aquí puedes agregar la lógica para guardar el favorito
+        # Por ejemplo, supongamos que tienes un modelo llamado Favourite
+        name = request.POST.get('name')
+        url = request.POST.get('url')
+        status = request.POST.get('status')
+        last_location = request.POST.get('last_location')
+        first_seen = request.POST.get('first_seen')
+        print(f"Datos recibidos: {name}, {url}, {status}, {last_location}, {first_seen}") # Depuración
+        # Aquí deberías guardar estos datos en tu modelo de Favoritos
+# Crear y guardar el nuevo favorito 
+        favourite, created = Favourite.objects.get_or_create( 
+            user=request.user, 
+            url=url, name=name, 
+            status=status, 
+            last_location=last_location, 
+            first_seen=first_seen 
+            )
+        print(f"Favorito creado: {created}, Favorito: {favourite}") # Depuración
+            # Suponiendo que guardaste correctamente el favorito:
+        if created: 
+            messages.success(request, 'Añadido a favoritos') 
+        else: 
+            messages.success(request, 'Añadido a favoritos')
+        return redirect('home')  # Redirige a la página de inicio o a donde consideres apropiado
+
+    # Si no es una solicitud POST, redirige al usuario a la página de inicio
+    return redirect('home')
+
 
 @login_required
-def deleteFavourite(request):
-    pass
+def deleteFavourite(request, favourite_id):
+    try:
+        favourite = Favourite.objects.get(id=favourite_id, user=request.user)
+        favourite.delete()
+        messages.success(request, 'Favorito eliminado')
+    except Favourite.DoesNotExist:
+        messages.error(request, 'No se pudo encontrar el favorito')
+    return redirect('favoritos')
+
 
 @login_required
 def exit(request):
-    pass
+    logout(request) 
+    return redirect('index-page')

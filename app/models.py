@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
 
 # Modelo para un favorito.
 class Favourite(models.Model):
@@ -14,3 +15,5 @@ class Favourite(models.Model):
 
     class Meta:
         unique_together = (('user', 'url', 'name', 'status', 'last_location', 'first_seen'),)
+    def __str__(self): 
+        return self.name
