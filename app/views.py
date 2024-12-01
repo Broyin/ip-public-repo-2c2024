@@ -18,21 +18,28 @@ def home(request):
     # Si tienes un parámetro de búsqueda (input), asegúrate de pasarlo a la vista.
     search_input = request.GET.get('search', None)
 
+    if search_input:
+        # Filtramos las imágenes si se proporciona un parámetro de búsqueda.
+        images = [img for img in images if search_input.lower() in img.name.lower()]
+
     # También puedes pasar los favoritos si es necesario.
     favourite_list = []
 
     return render(request, 'home.html', { 'images': images, 'favourite_list': favourite_list })
 
 def search(request):
-    search_msg = request.POST.get('query', '')
-
-    # si el texto ingresado no es vacío, trae las imágenes y favoritos desde services.py,
-    # y luego renderiza el template (similar a home).
-    if (search_msg != ''):
-        pass
+    if request.method == 'POST':
+        search_msg = request.POST.get('query', '')
+        if search_msg:
+            # Redirigimos a home con el parámetro de búsqueda.
+            return redirect(f'/home?search={search_msg}')
+        else:
+            # Si no hay mensaje de búsqueda, redirigimos a home.
+            return redirect('home')
     else:
+        # Si la solicitud no es POST, redirigimos a home.
         return redirect('home')
-
+ 
 
 # Estas funciones se usan cuando el usuario está logueado en la aplicación.
 @login_required
